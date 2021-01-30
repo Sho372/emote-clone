@@ -11,8 +11,8 @@ type Config struct {
 
 func Load() (*Config, error) {
 	v := viper.New()
-	v.SetConfigName("emote")
-	v.AddConfigPath(".")
+	v.SetConfigName("emote") // name of config file (without extension!!!)
+	v.AddConfigPath(".")     // path to look for the config file in
 
 	err := v.ReadInConfig()
 	if err != nil {
@@ -20,5 +20,6 @@ func Load() (*Config, error) {
 	}
 
 	c := &Config{}
+	err = v.Unmarshal(c)
 	return c, err
 }
