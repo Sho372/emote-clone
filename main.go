@@ -4,25 +4,27 @@ import (
 	"log"
 	"os"
 
-	"github.com/Sho372/emote-clone/emotions"
+	commands "github.com/Sho372/emote-clone/commands"
 	"github.com/spf13/cobra"
 )
 
 func main() {
-	app, err := emotions.New()
+	app, err := commands.New()
 	if err != nil {
 		log.Fatal(err)
 	}
-	cmd := buildEmoteCommand(app)
-	if err := cmd.Execute(); err != nil {
+	cmdEmote := buildEmoteCommand(app)     // cmdEmote as root command
+	cmdVersion := buildVersionCommand(app) // cmdVersion as sub command
+	cmdEmote.AddCommand(cmdVersion)
+	if err := cmdEmote.Execute(); err != nil {
 		os.Exit(1)
 	}
 }
 
-func buildEmoteCommand(app *emotions.App) *cobra.Command {
+func buildEmoteCommand(app *commands.App) *cobra.Command {
 	var dest string
 
-	emote := &cobra.Command {
+	cmdEmote := &cobra.Command{
 		Use: "emote",
 		PreRun: func(cmd *cobra.Command, args []string) {
 			app.Out = cmd.OutOrStdout()
@@ -34,7 +36,17 @@ func buildEmoteCommand(app *emotions.App) *cobra.Command {
 		Args: cobra.ExactArgs(1),
 	}
 
-	emote.Flags().StringVar(&dest, "dest", "clipboard", "Where to send your emotion")
+	cmdEmote.Flags().StringVar(&dest, "dest", "clipboard", "Where to send your emotion")
 
-	return emote
+	return cmdEmote
+}
+
+func buildVersionCommand(app *commands.App) *cobra.Command {
+	cmdVersion := &cobra.Command{
+		Use: "version",
+		Run: func(cmd *cobra.Command, args []string) {
+			app.Version()
+		},
+	}
+	return cmdVersion
 }
